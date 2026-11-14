@@ -1,4 +1,4 @@
-# KILL la KILL -IF- for iPhone and Mac
+# KILL la KILL -IF- for iPhone
 
 This fork of [nxnative](https://github.com/seedds/nxnative) adds **Kill la Kill The Game - IF** (`0100A3F00C536000`, 1.0.0) and lets the iPhone app import the game from your own dump. The game runs natively on Apple silicon: its own code on the chip, its graphics on Metal.
 
