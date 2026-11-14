@@ -125,6 +125,7 @@ static void romfs_identity_report(NSString *doc) {
 }
 
 static NSString *program_env(void);
+static int boot_game(void);
 static int boot_env(void) {
     NSFileManager *fm = NSFileManager.defaultManager;
     NSString *doc = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
@@ -174,6 +175,13 @@ static int boot_env(void) {
     NSString *lang = [NSBundle.mainBundle objectForInfoDictionaryKey:@"DMLanguage"];
     if (!getenv("DM_LANG") && [lang isKindOfClass:NSString.class] && lang.length) setenv("DM_LANG", lang.UTF8String, 0);
     fprintf(stderr, "boot: game language %s\n", getenv("DM_LANG") ?: "en-US");
+    return boot_game();
+}
+// The game's part of the boot: its files (program_env) and the host's early load. Again after the launcher imported the game files (front_ios_boot_retry)
+static int boot_game(void) {
+    NSFileManager *fm = NSFileManager.defaultManager;
+    NSString *doc = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    NSString *res = NSBundle.mainBundle.resourcePath;
     NSString *dm = program_env();
     if (!dm) { romfs_identity_report(doc); fprintf(stderr, "boot: game files not found (Documents/romfs.img, Documents/romfs or <App>/romfs)\n"); return 0; }
     setenv("DM_SAVE", [doc stringByAppendingPathComponent:@"save"].fileSystemRepresentation, 0);
@@ -242,6 +250,13 @@ void front_ios_boot(void) {   // Called by front_ios.m once the window and Metal
     pthread_t t; pthread_create(&t, &a, boot_thread, NULL); pthread_detach(t);
 }
 int front_ios_boot_ok(void) { return g_boot_ok; }
+int front_ios_boot_retry(void) {   // the launcher imported the game files (GameImport.m): look for them again, on the main thread before Play
+    if (g_boot_ok) return 1;
+    g_boot_message[0] = 0;
+    @autoreleasepool { g_boot_ok = boot_game(); }
+    fprintf(stderr, "boot: game files after the import: %s\n", g_boot_ok ? "found" : "[RED] still not found");
+    return g_boot_ok;
+}
 
 @interface App : UIResponder <UIApplicationDelegate>
 @end

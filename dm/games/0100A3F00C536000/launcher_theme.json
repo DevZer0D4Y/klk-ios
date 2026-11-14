@@ -1,0 +1,16 @@
+{
+ "accent": "#E8202A",
+ "background": [
+  "#140204",
+  "#5A0A10",
+  "#0A0A0A"
+ ],
+ "title": "KILL la KILL",
+ "subtitle": "THE GAME -IF-",
+ "labels": {
+  "DM_RENDER_SCALE": "Resolution"
+ },
+ "defaults": {
+  "DM_RENDER_SCALE": "0.85"
+ }
+}

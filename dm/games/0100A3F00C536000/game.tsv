@@ -1,0 +1,36 @@
+# Kill la Kill The Game - IF (0100A3F00C536000): from the NSP script's provisional profile (dm/games/profile_guess.py), then checked on the Mac and the iPhone
+# SDK 7; the game note is README.md
+
+# ---- Identity ----
+title_id	0100A3F00C536000
+program_id	0100A3F00C536000
+
+# ---- App ----
+name	Kill la Kill The Game - IF
+ipa	KillLaKillTheGameIf.ipa
+app_category	public.app-category.games
+
+# ---- Versions ----
+build	v0	1.0.0	main=d5413d9ec7c47e65cf6585647d92701d	subsdk0=baee264d3658fc6b6b581e5cbb662e3a	sdk=e30d2170165e907aba457c79fd83383d
+package	v0
+shader_versions	v0
+
+# ---- Files ----
+# every module main imports from
+modules	main subsdk0 sdk
+romfs_marker	Movie/KLK_OPENING.mp4
+zip_store	.cvt:.lev:.mp4:.mtex:.pac:.ptl:.snp:.wav:.metallib
+
+# ---- Memory ----
+# main sets a heap of at most the pool − 64 MB: a 3328 MB heap region
+mem_reserve	0x100000000
+mem_alias	0x10000000
+mem_stack	0x10000000
+app_pool	0xCD500000
+# the NPDM declares 0 MB of system resource: IsVirtualAddressMemoryEnabled is false, as on Horizon (Big Brain Academy: Brain vs. Brain sets a heap only then)
+sys_resource	0x0
+
+# ---- Shader split ----
+shader_groups	/KlkResources/=klkresources /KlkStory/=klkstory /layout_tex/=layouttex /shader/=shader /layout/=layout /message/=message /font/=font /Movie/=movie /script/=script /Test_Hud/=testhud /test_model/=testmodel /DataBase/=database /sound/=sound /Material/=material /test_marge_tex/=testmargetex /script_provisional/=scriptprovisiona /texture_pac/=texturepac
+shader_note	Kill la Kill The Game - IF shaders
+render_base	1920x1080 1280x720

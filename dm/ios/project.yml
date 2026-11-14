@@ -14,6 +14,8 @@ targets:
     sources:
       - path: Sources
         excludes: [Info.plist]  # generated per project under Gen/, so games never share the generated plist
+      - path: ../third_party/zstd   # the zstd decoder for NCZ / XCZ dumps (Sources/importer.c)
+        excludes: [LICENSE, README.md]
       - path: Gen/embed.S
       - path: Gen/dm          # Rewriter tables (*.fixups.tsv / gates / cuts / obs) + shader map / c1 list / warm-up list
         type: folder

@@ -21,6 +21,7 @@ void dm_gamepad_active(void);
 
 void front_ios_boot(void);
 int front_ios_boot_ok(void);
+bool dm_launcher_present(void);   // Launcher.swift: the app has a launcher (dm/launcher.json)
 const char *front_ios_boot_message(void);   // main.m: why a build that keeps the game files off the IPA found none usable (NULL = the generic hint)
 const char *front_ios_device_check(void);   // main.m: why this device cannot run the games (its GPU has no BC textures; NULL = supported); makes the first Metal device
 bool dm_show_launcher(void *view_controller, void (*done)(void));   // Launcher.swift: false = no launcher (no dm/launcher.json, or DM_LAUNCHER=0)
@@ -118,7 +119,7 @@ static void launcher_done(void) { [g_root startGame]; }
 #endif
     front_ios_power_watch();
     front_ios_notify_setup();
-    if (!front_ios_boot_ok()) {   // No game files: show a hint and do not start the host
+    if (!front_ios_boot_ok() && !dm_launcher_present()) {   // No game files and no launcher to import them with: show a hint and do not start the host
         const char *why = front_ios_boot_message();
         [self showHint:why ? [NSString stringWithFormat:@"Game files unusable.\n%s", why] : @"Game files not found.\nPut the RomFS folder into this App's Documents as \"romfs\" (Files app), then restart."]; return;
     }
@@ -146,6 +147,7 @@ static void launcher_done(void) { [g_root startGame]; }
 // The game view, the pad and the frame-rate counter are made once the launcher has set the switches they read (DM_SHOW_FPS, DM_METAL_HUD); the host's loading began at app launch (main.m)
 - (void)startGame {
     if (self.game) return;
+    if (!front_ios_boot_ok()) { [self showHint:@"Game files not found.\nImport them from your game dump in the launcher, then press Play."]; return; }   // (the launcher keeps Play off until they are in place)
     dm_cloud_saves_env();   // DM_SAVE_SYNC from the launcher's Cloud saves pick, before the game's first save mount reads it (CloudSaves.m, save_sync.h)
     front_hud_env();   // before the process's first Metal device, which reads MTL_HUD_ENABLED (an env file's DM_METAL_HUD sets it in main.m already; GitHub issue #840)
     const char *dev = front_ios_device_check();   // that first device: a GPU without BC textures is refused here, not at launch, so the launcher's HUD switch counts
@@ -216,12 +218,12 @@ static void launcher_done(void) { [g_root startGame]; }
 }
 - (void)viewDidAppear:(BOOL)a {
     [super viewDidAppear:a];
-    if (!front_ios_boot_ok() && front_ios_boot_message() && !self.presentedViewController) {   // a slim build whose game file image is missing or another version (main.m)
+    if (!front_ios_boot_ok() && front_ios_boot_message() && !self.presentedViewController && !dm_launcher_present()) {   // (with a launcher, its Game files section says so)   // a slim build whose game file image is missing or another version (main.m)
         UIAlertController *a = [UIAlertController alertControllerWithTitle:@"Game files" message:@(front_ios_boot_message()) preferredStyle:UIAlertControllerStyleAlert];
         [a addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:a animated:YES completion:nil];
     }
-    if (self.launched || !front_ios_boot_ok()) return;
+    if (self.launched || (!front_ios_boot_ok() && !dm_launcher_present())) return;   // without the game files the launcher still shows: its Game files section imports them
     self.launched = YES; g_root = self;
     if (!dm_show_launcher((__bridge void *)self, launcher_done)) [self startGame];   // the settings screen first (Launcher.swift), when the app has one
     front_ios_notify_ask();
